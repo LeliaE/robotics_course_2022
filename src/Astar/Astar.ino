@@ -5,7 +5,7 @@
 
 #include <ArduinoSTL.h>
 #include <ZumoShield.h>
-#include <Wire.h>
+#include<Wire.h>
 #include "Node.h"
 #include "Grid.h"
 
@@ -14,54 +14,104 @@
 #include<algorithm> 
 #include<string>
 
-// Constants
 #define turnSpeed 275
 #define forwardSpeed 200
 #define turnLeftDuration 307
 #define turnRightDuration 300
 
-// Pins and Variables
+//  ******** PINS & VARIABLES ***********
 int trigPin = 13;
 int echoPin = 12;
-long duration, distance_travelled, cm, inches;
-bool arrived = false;
-bool move_decided = false;
+long duration, cm, inches;
+long objectDistance;
+bool obstacleDetected = false;
+
+//  ******** ZUMO ***********
 ZumoMotors motors;
+const int MAXSPEED = 400; // maximum speed of the Zumo motors
+float motorSpeed;         // actual speed of the motors
 Pushbutton button(ZUMO_BUTTON);
 
+// ******** GRID *************
 std::vector<Node> blacklist = {Node(0,3), Node(1,1), Node(7,6)};
 Grid grid(0, 0, 7, 7, Node(7,7), blacklist, Grid::direction_facing::DOWN);
 
+// ********** MOVE ***********
+bool arrived = false;
+bool move_decided = false;
+
+// ******* DISTANCE ****************************
+const float MAXDISTANCE = 50.0; // the size of one node so max the robot should go for one move
+float distanceTravelled = 0.0;  // the distance travelled so far
+float distanceReverse = 0.0;    // the distance it should go back to reach neutral position
+
+// ********** TIME *******************
+long timeStart;
+long timeCurrent;
+long timeTravelled;
+
 
 ////////////////////////
-// Movement Functions
+// Functions
 ////////////////////////
 
+// ****************** DETECTION ******************************
+void get_object_distance()
+{
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(5);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(5);
+    pinMode(echoPin, INPUT);
+    duration = pulseIn(echoPin, HIGH);
+    objectDistance = (duration/2) * 0.0343;
+
+    Serial.print(objectDistance);
+    Serial.print("cm");
+    Serial.println();
+    delay(230);
+}
+
+void obstacle_detection() {
+    get_object_distance();
+    if(objectDistance < MAXDISTANCE) {
+      obstacleDetected = true;
+    }
+}
+
+
+// ******************** MOVEMENT *************************************
 void go_forward() {
-    // move forward
-    // ++distance_travelled
+    // Setting up speed
+    int breakFactor = 2;                // use this to increase/decrease speed
+    motorSpeed = MAXSPEED/breakFactor;  // setting motor speed
+
+    // Moving forward
+    motors.setSpeeds(motorSpeed, motorSpeed);
+
+    // Calculating distance
+    timeCurrent = millis();
+    timeTravelled = timeCurrent - timeStart;
+    distanceTravelled = (motorSpeed* timeTravelled)/1000;     
 }
 
 void go_back() {
-    // while (distance_travelled > 0) {
-    //     // go back distance
-    //     // --distance_travelled
-    // }
-    motors.setSpeeds(-forwardSpeed, -forwardSpeed);
-    delay(duration);
-    distance_travelled = 0;
-    duration = 0;
+    while (distanceTravelled > 0.0) {
+        motors.setSpeeds(-motorSpeed, -motorSpeed);
+    }
+    distanceTravelled = 0;
+    timeTravelled = 0;
     stop();
 }
 
 void turn_left(){
-  motors.setSpeeds(-turnSpeed, turnSpeed);
+  motors.setSpeeds(-motorSpeed, motorSpeed);
   delay(turnLeftDuration);
   stop();
 }
 
 void turn_right(){
-  motors.setSpeeds(turnSpeed, -turnSpeed);
+  motors.setSpeeds(motorSpeed, -motorSpeed);
   delay(turnRightDuration);
   stop();
 }
@@ -163,10 +213,7 @@ void turn_if_necessary() {
 }
 
 
-////////////////////////
-// Sensor Functions
-////////////////////////
-
+// ******************** SENSOR *************************************
 long microsecondsToInches(long microseconds) {
   // See: http://www.parallax.com/dl/docs/prod/acc/28015-PING-v1.3.pdf
   return microseconds / 74 / 2;
@@ -231,30 +278,30 @@ void loop() {
             // goal reached
             if(grid.currentNode->status == Node::GOAL) {
                 arrived=true;
-            } 
-            // decide where to go and turn facing the next square
-            else {
-                grid.decide_move(move_decided);
-                turn_if_necessary();
             }
+            // decide where to go and turn facing the next square
+            grid.decide_move(move_decided);
+            turn_if_necessary();
+            timeStart = millis();
         }
         else {
-            // move forward and update travelled distance
             go_forward();
-            Serial.println("Hello");
-            get_distance();
-            
+
             // stop if arrived at next square
-            if(distance_travelled >= 50) {
+            if(distanceTravelled >= 50) {
                 stop();
                 grid.finish_move(move_decided);
+                timeTravelled = 0;
+                distanceTravelled = 0;
             }
+
+            // read sensor input
+            obstacle_detection();
             // go back to last square if obstacle is detected along the way
-            if (obstacle_detected()) {
+            if(obstacleDetected)
                 go_back();
                 grid.add_approached_to_blacklist();
                 move_decided = false;
-            }
         }
 
     }
