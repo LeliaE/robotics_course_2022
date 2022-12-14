@@ -35,8 +35,8 @@ class Node {
             return status == CLEAR || status == GOAL;
         }
         
-        bool is_node(int x, int y) {
-            return (this->x == x && this->y == y);
+        bool is_node(Node other) {
+            return (this->x == other.x && this->y == other.y);
         }
 };
 

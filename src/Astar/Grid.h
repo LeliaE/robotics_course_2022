@@ -10,6 +10,7 @@
 class Grid {
 
     public:
+        enum direction_facing  {UP=0, DOWN=1, LEFT=2, RIGHT=3};
 
         int min_x, min_y;
         int max_x, max_y;
@@ -18,8 +19,9 @@ class Grid {
         Node* approachedNode = nullptr;
         std::vector<Node> blacklist;
         std::map<Node*, int> neighbours_heuristics;
+        direction_facing facing;
 
-        Grid(int x = 0, int y = 0, int width = 7, int height = 7, Node goal = Node(7,7), std::vector<Node> blacklist = {}) : min_x(x), min_y(y), max_x(width), max_y(height), blacklist(blacklist) {
+        Grid(int x = 0, int y = 0, int width = 7, int height = 7, Node goal = Node(7,7), std::vector<Node> blacklist = {}, direction_facing facing = direction_facing::DOWN) : min_x(x), min_y(y), max_x(width), max_y(height), blacklist(blacklist), facing(facing) {
             
             for (int w = min_x; w <= max_x; ++w) {
                 for (int h = min_y; h <= max_y; ++h) {
@@ -33,7 +35,7 @@ class Grid {
 
                     // define blacklisted nodes
                     for (const auto& b : blacklist) { 
-                        if(node->is_node(b.x,b.y)) {
+                        if(node->is_node(b)) {
                             node->status = Node::OBSTACLE;
                         }
                     }
@@ -58,16 +60,16 @@ class Grid {
             // throw std::exception
         };
 
-        void add_to_blacklist(int x, int y) {
-            Node* blacklisted = this->at(x,y);
+        void add_approached_to_blacklist() {
+            // Node* blacklisted = this->at(x,y);
             for (const auto& node : nodes) {
-                if(node->is_node(x,y)) {
+                if(node->is_node(*approachedNode)) {
                     node->status = Node::OBSTACLE;
                     break;
                 }
             }
 
-            this->blacklist.push_back(Node(x,y));
+            this->blacklist.push_back(Node(approachedNode->x,approachedNode->y));
         }
 
         std::vector<Node*> get_neighbours() {
@@ -160,7 +162,7 @@ class Grid {
             neighbours_heuristics = distances;
         }
 
-        void decide_move() {
+        void decide_move(bool& move_decided) {
             update_distances_for_neighbours();
 
             //std::map<Node*, int>* it = min_element(neighbours_heuristics.begin(), neighbours_heuristics.end(),
@@ -169,13 +171,18 @@ class Grid {
             auto it = min_element(neighbours_heuristics.begin(), neighbours_heuristics.end(),
                 [](decltype(neighbours_heuristics)::value_type& l, decltype(neighbours_heuristics)::value_type& r) { return l.second < r.second; });
 
-            // actually move
             approachedNode = it->first;
+            move_decided = true;
             //return approachedNode;->print();
         }
 
-        void actually_move() {
+        void move() {
+
+        }
+
+        void finish_move(bool& move_decided) {
             currentNode = approachedNode;
+            move_decided = false;
         }
 
 };
