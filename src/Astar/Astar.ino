@@ -1,3 +1,8 @@
+
+////////////////////////
+// Include and Define
+////////////////////////
+
 #include <ArduinoSTL.h>
 #include <ZumoShield.h>
 #include <Wire.h>
@@ -16,10 +21,9 @@
 #define turnRightDuration 300
 
 // Pins and Variables
-int trigPin = 10;
-int echoPin = 9;
-int ledPin = 13;
-long duration, distance_travelled, cm;
+int trigPin = 13;
+int echoPin = 12;
+long duration, distance_travelled, cm, inches;
 bool arrived = false;
 bool move_decided = false;
 ZumoMotors motors;
@@ -163,27 +167,40 @@ void turn_if_necessary() {
 // Sensor Functions
 ////////////////////////
 
+long microsecondsToInches(long microseconds) {
+  // See: http://www.parallax.com/dl/docs/prod/acc/28015-PING-v1.3.pdf
+  return microseconds / 74 / 2;
+}
+
+long microsecondsToCentimeters(long microseconds){
+  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
+  return microseconds / 29 / 2;
+}
+
 void get_distance()
 {
-    digitalWrite(trigPin, LOW);
-    delayMicroseconds(5);
     digitalWrite(trigPin, HIGH);
-    delayMicroseconds(5);
-    pinMode(echoPin, INPUT);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+  
     duration = pulseIn(echoPin, HIGH);
-    cm = (duration/2) * 0.0343;
-
-    Serial.print("in,");
+  
+    // convert the time into a distance
+    inches = microsecondsToInches(duration);
+    cm = microsecondsToCentimeters(duration);
+    
+    Serial.print(inches);
+    Serial.print("in, ");
     Serial.print(cm);
     Serial.print("cm");
     Serial.println();
-
-    delay(230);
+    
+    delay(500);
 }
 
 bool obstacle_detected() {
     get_distance();
-    if(cm < 50) {
+    if(cm < 50 && cm != 0) {
       return true;
     }
     return false;
@@ -195,9 +212,9 @@ bool obstacle_detected() {
 ////////////////////////
 
 void setup() {
-    pinMode(ledPin, HIGH);
     pinMode(trigPin, OUTPUT);
     pinMode(echoPin, INPUT);
+    Serial.begin(9600);
 }
 
 void update() {
@@ -224,6 +241,8 @@ void loop() {
         else {
             // move forward and update travelled distance
             go_forward();
+            Serial.println("Hello");
+            get_distance();
             
             // stop if arrived at next square
             if(distance_travelled >= 50) {
