@@ -9,17 +9,16 @@
 #include<algorithm> 
 #include<string>
 
-// variables
-#define LED 13
-
+// Constants
 #define turnSpeed 275
 #define forwardSpeed 200
 #define turnLeftDuration 307
 #define turnRightDuration 300
 
-// pins and variables
+// Pins and Variables
 int trigPin = 10;
 int echoPin = 9;
+int ledPin = 13;
 long duration, distance_travelled, cm;
 bool arrived = false;
 bool move_decided = false;
@@ -29,7 +28,11 @@ Pushbutton button(ZUMO_BUTTON);
 std::vector<Node> blacklist = {Node(0,3), Node(1,1), Node(7,6)};
 Grid grid(0, 0, 7, 7, Node(7,7), blacklist, Grid::direction_facing::DOWN);
 
-// movement functions
+
+////////////////////////
+// Movement Functions
+////////////////////////
+
 void go_forward() {
     // move forward
     // ++distance_travelled
@@ -64,34 +67,6 @@ void stop(){
   delay(300);
 }
 
-// sensor functions
-void get_distance()
-{
-    digitalWrite(trigPin, LOW);
-    delayMicroseconds(5);
-    digitalWrite(trigPin, HIGH);
-    delayMicroseconds(5);
-    pinMode(echoPin, INPUT);
-    duration = pulseIn(echoPin, HIGH);
-    cm = (duration/2) * 0.0343;
-
-    Serial.print("in,");
-    Serial.print(cm);
-    Serial.print("cm");
-    Serial.println();
-
-    delay(230);
-}
-
-bool obstacle_detected() {
-    get_distance();
-    if(cm < 50) {
-      return true;
-    }
-    return false;
-}
-
-// turn function
 void turn_if_necessary() {
     if(grid.facing == Grid::direction_facing::DOWN) {
         // approached node below
@@ -183,11 +158,44 @@ void turn_if_necessary() {
     }
 }
 
-// standard arduino functions
+
+////////////////////////
+// Sensor Functions
+////////////////////////
+
+void get_distance()
+{
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(5);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(5);
+    pinMode(echoPin, INPUT);
+    duration = pulseIn(echoPin, HIGH);
+    cm = (duration/2) * 0.0343;
+
+    Serial.print("in,");
+    Serial.print(cm);
+    Serial.print("cm");
+    Serial.println();
+
+    delay(230);
+}
+
+bool obstacle_detected() {
+    get_distance();
+    if(cm < 50) {
+      return true;
+    }
+    return false;
+}
+
+
+////////////////////////
+// Arduino Functions
+////////////////////////
+
 void setup() {
-    // std::vector<Node> blacklist = {Node(0,3), Node(1,1), Node(7,6)};
-    // Grid grid(0, 0, 7, 7, Node(7,7), blacklist);
-    pinMode(LED, HIGH);
+    pinMode(ledPin, HIGH);
     pinMode(trigPin, OUTPUT);
     pinMode(echoPin, INPUT);
 }
@@ -198,25 +206,31 @@ void update() {
 
 void loop() {
     if(arrived) {
+        // goal reached -> stop
         stop();
     }
     else {
-        //std::cout << "Moving to: "<< grid.decide_move() << std::endl;
         if (!move_decided) {
-            // stop on arrival
+            // goal reached
             if(grid.currentNode->status == Node::GOAL) {
                 arrived=true;
+            } 
+            // decide where to go and turn facing the next square
+            else {
+                grid.decide_move(move_decided);
+                turn_if_necessary();
             }
-            grid.decide_move(move_decided);
-            turn_if_necessary();
         }
         else {
+            // move forward and update travelled distance
             go_forward();
             
+            // stop if arrived at next square
             if(distance_travelled >= 50) {
                 stop();
                 grid.finish_move(move_decided);
             }
+            // go back to last square if obstacle is detected along the way
             if (obstacle_detected()) {
                 go_back();
                 grid.add_approached_to_blacklist();
