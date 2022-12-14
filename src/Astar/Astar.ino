@@ -20,8 +20,8 @@
 #define turnRightDuration 300
 
 //  ******** PINS & VARIABLES ***********
-int trigPin = 13;
-int echoPin = 12;
+int trigPin = 9;
+int echoPin = 10;
 long duration, cm, inches;
 long objectDistance;
 bool obstacleDetected = false;
@@ -56,20 +56,38 @@ long timeTravelled;
 ////////////////////////
 
 // ****************** DETECTION ******************************
+long microsecondsToInches(long microseconds) {
+  // See: http://www.parallax.com/dl/docs/prod/acc/28015-PING-v1.3.pdf
+  return microseconds / 74 / 2;
+}
+
+long microsecondsToCentimeters(long microseconds){
+  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
+  return microseconds / 29 / 2;
+}
+
 void get_object_distance()
 {
     digitalWrite(trigPin, LOW);
-    delayMicroseconds(5);
+    delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);
-    delayMicroseconds(5);
-    pinMode(echoPin, INPUT);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+  
     duration = pulseIn(echoPin, HIGH);
-    objectDistance = (duration/2) * 0.0343;
-
-    Serial.print(objectDistance);
+  
+    // convert the time into a distance
+    Serial.print(duration);
+    inches = microsecondsToInches(duration);
+    cm = microsecondsToCentimeters(duration);
+    
+    Serial.print(inches);
+    Serial.print("in, ");
+    Serial.print(cm);
     Serial.print("cm");
     Serial.println();
-    delay(230);
+    
+    delay(500);
 }
 
 void obstacle_detection() {
@@ -212,46 +230,6 @@ void turn_if_necessary() {
     }
 }
 
-
-// ******************** SENSOR *************************************
-long microsecondsToInches(long microseconds) {
-  // See: http://www.parallax.com/dl/docs/prod/acc/28015-PING-v1.3.pdf
-  return microseconds / 74 / 2;
-}
-
-long microsecondsToCentimeters(long microseconds){
-  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
-  return microseconds / 29 / 2;
-}
-
-void get_distance()
-{
-    digitalWrite(trigPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigPin, LOW);
-  
-    duration = pulseIn(echoPin, HIGH);
-  
-    // convert the time into a distance
-    inches = microsecondsToInches(duration);
-    cm = microsecondsToCentimeters(duration);
-    
-    Serial.print(inches);
-    Serial.print("in, ");
-    Serial.print(cm);
-    Serial.print("cm");
-    Serial.println();
-    
-    delay(500);
-}
-
-bool obstacle_detected() {
-    get_distance();
-    if(cm < 50 && cm != 0) {
-      return true;
-    }
-    return false;
-}
 
 
 ////////////////////////
