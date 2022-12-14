@@ -43,12 +43,14 @@ bool move_decided = false;
 // ******* DISTANCE ****************************
 const float MAXDISTANCE = 50.0; // the size of one node so max the robot should go for one move
 float distanceTravelled = 0.0;  // the distance travelled so far
+float distanceTravelledBackwards = 0.0; 
 float distanceReverse = 0.0;    // the distance it should go back to reach neutral position
 
 // ********** TIME *******************
 long timeStart;
 long timeCurrent;
 long timeTravelled;
+long timeStop;
 
 
 ////////////////////////
@@ -96,11 +98,19 @@ void go_forward() {
 }
 
 void go_back() {
-    while (distanceTravelled > 0.0) {
-        motors.setSpeeds(-motorSpeed, -motorSpeed);
+
+    timeStop = millis();
+    bool go_backwards = true;
+    while (go_backwards) {
+      timeCurrent = millis();
+      timeTravelled = timeCurrent - timeStop;
+      distanceTravelledBackwards = (motorSpeed* timeTravelled)/1000; 
+      if (distanceTravelledBackwards >= distanceTravelled ){
+        go_backwards = false;
+      }
+      motors.setSpeeds(-motorSpeed, -motorSpeed);
     }
-    distanceTravelled = 0;
-    timeTravelled = 0;
+    distanceTravelledBackwards = 0;
     stop();
 }
 
@@ -302,6 +312,7 @@ void loop() {
                 go_back();
                 grid.add_approached_to_blacklist();
                 move_decided = false;
+                obstacleDetected = false;
         }
 
     }
