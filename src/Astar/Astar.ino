@@ -1,18 +1,20 @@
+#include "ArduinoSTL.h"
+
 
 ////////////////////////
 // Include and Define
 ////////////////////////
 
-#include <ArduinoSTL.h>
-#include <ZumoShield.h>
-#include<Wire.h>
+#include "ArduinoSTL.h"
+#include "ZumoShield.h"
+#include "Wire.h"
 #include "Node.h"
 #include "Grid.h"
 
-#include<vector> 
-#include<map> 
-#include<algorithm> 
-#include<string>
+#include "vector" 
+#include "map" 
+#include "algorithm" 
+#include "string"
 
 #define turnSpeed 275
 #define forwardSpeed 200
@@ -252,9 +254,6 @@ void setup() {
     Serial.begin(9600);
 }
 
-void update() {
- 
-}
 
 void loop() {
     if(arrived) {
