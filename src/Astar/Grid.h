@@ -1,3 +1,13 @@
+/*
+  Program name: Grid
+  Authors: Amelie Schneider (C++ master), Lelia Erscoi (algorithm architect),
+           Hritika Kathuria (object detection technician)
+  Date created: 08-12-2022
+  Last updated: 31-12-2022
+  Description: Defining class for the grid. Has functionality for neighbor nodes
+               and finding the next best move based on a heuristic.
+*/
+
 #ifndef GRID
 #define GRID
 #include "Node.h"

@@ -1,3 +1,12 @@
+/*
+  Program name: Node
+  Authors: Amelie Schneider (C++ master), Lelia Erscoi (algorithm architect),
+           Hritika Kathuria (object detection technician)
+  Date created: 08-12-2022
+  Last updated: 31-12-2022
+  Description: Defining class for the nodes. A node is the smallest unit of the grid,
+               has a position and a status.
+*/
 #ifndef NODE
 #define NODE
 

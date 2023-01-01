@@ -1,5 +1,14 @@
-#include "ArduinoSTL.h"
-
+/*
+  Program name: A* grid search program for Arduino Zumo
+  Authors: Amelie Schneider (C++ master), Lelia Erscoi (algorithm architect),
+           Hritika Kathuria (object detection technician)
+  Date created: 08-12-2022
+  Last updated: 31-12-2022
+  Description: A program to allow a Zumo robot to navigate a grid by finding the
+               next best move. Actively checks the path for obstacles to add the
+               corresponding node to the blacklist. Program runs until finding the
+               target node.
+*/
 
 ////////////////////////
 // Include and Define

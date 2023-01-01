@@ -1,3 +1,12 @@
+/*
+  Program name: Grid functions
+  Authors: Amelie Schneider (C++ master), Lelia Erscoi (algorithm architect),
+           Hritika Kathuria (object detection technician)
+  Date created: 08-12-2022
+  Last updated: 31-12-2022
+  Description: Contains the functionality of the grid. 
+*/
+
 #include "Grid.h"
 
 Grid::Grid(int x, int y, int width, int height, Node goal, std::vector<Node> blacklist, DIRECTION_FACING facing) : 
