@@ -1,3 +1,5 @@
+* CHECK RAW FOR PROPER VIEW *
+
 variables:
 NODE: x position, y position, status = {clear, target, obstacle}
 GRID: height, width, blacklist of obstacles
