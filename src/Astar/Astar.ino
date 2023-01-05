@@ -30,8 +30,8 @@
 #define TURN_RIGHT_DURATION 310
 
 //  ******** PINS & VARIABLES ***********
-int trigPin = 9;
-int echoPin = 10;
+int trigPin = 11;
+int echoPin = 12;
 long duration, cm, inches;
 long objectDistance;
 bool obstacleDetected = false;
@@ -64,45 +64,45 @@ long timeStop;
 ////////////////////////
 
 // ****************** DETECTION ******************************
-// long microseconds_to_inches(long microseconds) {
-//   // See: http://www.parallax.com/dl/docs/prod/acc/28015-PING-v1.3.pdf
-//   return (microseconds / 74 / 2);
-// }
+long microseconds_to_inches(long microseconds) {
+  // See: http://www.parallax.com/dl/docs/prod/acc/28015-PING-v1.3.pdf
+  return (microseconds / 74 / 2);
+}
 
-// long microseconds_to_centimeters(long microseconds){
-//   // The speed of sound is 340 m/s or 29 microseconds per centimeter.
-//   return (microseconds / 29 / 2);
-// }
+long microseconds_to_centimeters(long microseconds){
+  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
+  return (microseconds / 29 / 2);
+}
 
-// void get_object_distance() {
-//   digitalWrite(trigPin, LOW);
-//   delayMicroseconds(2);
-//   digitalWrite(trigPin, HIGH);
-//   delayMicroseconds(10);
-//   digitalWrite(trigPin, LOW);
+void get_object_distance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
 
-//   duration = pulseIn(echoPin, HIGH);
+  duration = pulseIn(echoPin, HIGH);
 
-//   // convert the time into a distance
-//  // Serial.print(duration);
-//  // Serial.print("...");
-//   // inches = microseconds_to_inches(duration);
-//   cm = microseconds_to_centimeters(duration);
+  // convert the time into a distance
+ // Serial.print(duration);
+ // Serial.print("...");
+  // inches = microseconds_to_inches(duration);
+  cm = microseconds_to_centimeters(duration);
+  //delay(1000);
   
-//   Serial.print(duration);
-//   Serial.print("duration, ");
-//   Serial.print(cm);
-//   Serial.print("cm");
-//  Serial.println();
-// }
+  //Serial.print(duration);
+  //Serial.print("duration, ");
+  //Serial.print(cm);
+  //Serial.print("cm");
+  //Serial.println();
+}
 
-// void obstacle_detection() {
-//   get_object_distance();
-//   if(cm < MAX_DISTANCE && cm != 0) {
-//     obstacleDetected = true;
-//   }
-// }
-
+void obstacle_detection() {
+  get_object_distance();
+  if(cm > 1800 && cm != 0) {
+    obstacleDetected = true;
+  }
+}
 
 // ******************** MOVEMENT *************************************
 void go_forward() {
@@ -246,7 +246,7 @@ void turn_if_necessary() {
 
 void setup() {
   pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, OUTPUT);
+  pinMode(echoPin, INPUT);
   Serial.begin(9600);     
   stop();
   // Serial.print("Initializing...");
@@ -264,11 +264,13 @@ void loop() {
       if(grid.currentNode->status == Node::GOAL) {
           arrived=true;
       }
-      // decide where to go and turn facing the next square
-      grid.decide_move(moveDecided);
-      turn_if_necessary();
-      
-      timeStart = millis();
+      else {
+        // decide where to go and turn facing the next square
+        grid.decide_move(moveDecided);
+        turn_if_necessary();
+        
+        timeStart = millis();
+      }
     }
     else {
       go_forward();
@@ -277,7 +279,7 @@ void loop() {
       // stop if arrived at next square
       if(distanceTravelled >= 315) {
         stop();
-        Serial.println("Move has been decided.");
+        //Serial.println("Move has been decided.");
         grid.finish_move(moveDecided);
 
         // Checking current coordinates
@@ -291,15 +293,15 @@ void loop() {
         distanceTravelled = 0;
       }
       // read sensor input
-      // obstacle_detection();
-      // // go back to last square if obstacle is detected along the way
-      // if(obstacleDetected){
-      //     go_back();
-      //     grid.add_approached_to_blacklist();
-      //     moveDecided = false;
-      //     obstacleDetected = false;
-      //     //Serial.print("An obstacle was added to the blacklist.");
-      // }
+      obstacle_detection();
+      // go back to last square if obstacle is detected along the way
+      if(obstacleDetected){
+           go_back();
+           grid.add_approached_to_blacklist();
+           moveDecided = false;
+           obstacleDetected = false;
+          Serial.println("Object detected!");
+       }
     }
   }
 }

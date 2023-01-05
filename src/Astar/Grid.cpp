@@ -41,6 +41,7 @@ Grid::Grid(int x, int y, int width, int height, Node goal, DIRECTION_FACING faci
   this->at(2,5)->status = Node::OBSTACLE;
   this->at(3,0)->status = Node::OBSTACLE;
   this->at(3,2)->status = Node::OBSTACLE;
+  this->at(3,7)->status = Node::OBSTACLE;
   this->at(4,0)->status = Node::OBSTACLE;
   this->at(4,2)->status = Node::OBSTACLE;
   this->at(4,4)->status = Node::OBSTACLE;
