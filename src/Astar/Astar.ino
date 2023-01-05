@@ -43,7 +43,9 @@ const float MOTOR_SPEED = MAX_SPEED/2;         // actual speed of the motors
 Pushbutton button(ZUMO_BUTTON);
 
 // ******** GRID *************
-std::vector<Node> blacklist = {Node(0,3), Node(1,1), Node(7,6)};
+std::vector<Node> blacklist = {Node(0,4), Node(0,7), Node(1,3), Node(2,5), Node(3,0)
+                              Node(3,2), Node(4,0), Node(4,2), Node(4,4), Node(5,6),
+                              Node(6,2), Node(6,4)};
 Grid grid(0, 0, 7, 7, Node(7,7), blacklist, Grid::DIRECTION_FACING::DOWN);
 
 // ********** MOVE ***********
@@ -56,7 +58,7 @@ float distanceTravelled = 0.0;  // the distance travelled so far
 float distanceTravelledBackwards = 0.0; 
 
 // ********** TIME *******************
-long timeStart;
+unsigned long timeStart;
 long timeCurrent;
 long timeTravelled;
 long timeStop;
@@ -73,7 +75,7 @@ long microseconds_to_inches(long microseconds) {
 
 long microseconds_to_centimeters(long microseconds){
   // The speed of sound is 340 m/s or 29 microseconds per centimeter.
-  return (microseconds / 29 / 2);
+  return (microseconds / 29  2);
 }
 
 void get_object_distance() {
