@@ -28,6 +28,8 @@ class Grid {
     std::vector<Node> blacklist;
     std::map<Node*, int> neighboursHeuristics;
     DIRECTION_FACING facing;
+    float distanceTravelled = 0.0;  // the distance travelled so far
+    float distanceTravelledBackwards = 0.0; 
 
     Grid(int x = 0, int y = 0, int width = 7, int height = 7, Node goal = Node(7,7), std::vector<Node> blacklist = {},DIRECTION_FACING facing =DIRECTION_FACING::DOWN);
     

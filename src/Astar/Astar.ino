@@ -3,7 +3,7 @@
   Authors: Amelie Schneider (C++ master), Lelia Erscoi (algorithm architect),
            Hritika Kathuria (object detection technician)
   Date created: 08-12-2022
-  Last updated: 31-12-2022
+  Last updated: 05-01-2022
   Description: A program to allow a Zumo robot to navigate a grid by finding the
                next best move. Actively checks the path for obstacles to add the
                corresponding node to the blacklist. Program runs until finding the
@@ -26,7 +26,7 @@
 #include "string"
 
 #define TURN_SPEED 275
-#define TURN_LEFT_DURATION 307
+#define TURN_LEFT_DURATION 400
 #define TURN_RIGHT_DURATION 300
 
 //  ******** PINS & VARIABLES ***********
@@ -68,12 +68,12 @@ long timeStop;
 // ****************** DETECTION ******************************
 long microseconds_to_inches(long microseconds) {
   // See: http://www.parallax.com/dl/docs/prod/acc/28015-PING-v1.3.pdf
-  return microseconds / 74 / 2;
+  return (microseconds / 74 / 2);
 }
 
 long microseconds_to_centimeters(long microseconds){
   // The speed of sound is 340 m/s or 29 microseconds per centimeter.
-  return microseconds / 29 / 2;
+  return (microseconds / 29 / 2);
 }
 
 void get_object_distance() {
@@ -86,16 +86,16 @@ void get_object_distance() {
   duration = pulseIn(echoPin, HIGH);
 
   // convert the time into a distance
-  Serial.print(duration);
-  Serial.print("...");
-  inches = microseconds_to_inches(duration);
+ // Serial.print(duration);
+ // Serial.print("...");
+  // inches = microseconds_to_inches(duration);
   cm = microseconds_to_centimeters(duration);
   
-  Serial.print(inches);
-  Serial.print("in, ");
+  Serial.print(duration);
+  Serial.print("duration, ");
   Serial.print(cm);
   Serial.print("cm");
-  Serial.println();
+ Serial.println();
 }
 
 void obstacle_detection() {
@@ -135,8 +135,8 @@ void go_back() {
 }
 
 void turn_left() {
-  motors.setSpeeds(-MOTOR_SPEED, MOTOR_SPEED);
-  delay(TURN_LEFT_DURATION);
+  motors.setSpeeds(-MOTOR_SPEED, MOTOR_SPEED*2);
+  //delay(TURN_LEFT_DURATION);
   stop();
 }
 
@@ -247,59 +247,60 @@ void turn_if_necessary() {
 ////////////////////////
 
 void setup() {
-  Serial.print("Initializing...");
+  //Serial.print("Initializing...");
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   Serial.begin(9600);     
 }
 
 void loop() {
-  if(arrived) {
-      // goal reached -> stop
-      Serial.print("Target reached!");
-      stop();
-  }
-  else {
-    if (!moveDecided) {
-      // goal reached
-      if(grid.currentNode->status == Node::GOAL) {
-          arrived=true;
-      }
-      // decide where to go and turn facing the next square
-      grid.decide_move(moveDecided);
-      turn_if_necessary();
-      timeStart = millis();
-      Serial.print("testtest");
-    }
-    else {
-      go_forward();
-      Serial.print("going forward!");
+  obstacle_detection();
+  // if(arrived) {
+  //     // goal reached -> stop
+  //     //Serial.print("Target reached!");
+  //     stop();
+  // }
+  // else {
+  //   if (!moveDecided) {
+  //     // goal reached
+  //     if(grid.currentNode->status == Node::GOAL) {
+  //         arrived=true;
+  //     }
+  //     // decide where to go and turn facing the next square
+  //     grid.decide_move(moveDecided);
+  //     turn_if_necessary();
+  //     timeStart = millis();
+  //     //Serial.print("testtest");
+  //   }
+  //   else {
+  //     go_forward();
+  //     Serial.print("going forward!");
 
-      // stop if arrived at next square
-      if(distanceTravelled >= 50) {
-        stop();
-        Serial.print("Move has been decided.s");
-        grid.finish_move(moveDecided);
+  //     // stop if arrived at next square
+  //     if(distanceTravelled >= 50) {
+  //       stop();
+  //       Serial.println("Move has been decided.s");
+  //       grid.finish_move(moveDecided);
 
-        // Checking current coordinates
-        Serial.print("X: ");
-        Serial.print(grid.get_current_x());
-        Serial.print("y: ");
-        Serial.print(grid.get_current_y());
+  //       // Checking current coordinates
+  //       //Serial.print("X: ");
+  //       //Serial.print(grid.get_current_x());
+  //       //Serial.print("y: ");
+  //       //Serial.print(grid.get_current_y());
       
-        timeTravelled = 0;
-        distanceTravelled = 0;
-      }
-      // read sensor input
-      obstacle_detection();
-      // go back to last square if obstacle is detected along the way
-      if(obstacleDetected){
-          go_back();
-          grid.add_approached_to_blacklist();
-          moveDecided = false;
-          obstacleDetected = false;
-          Serial.print("An obstacle was added to the blacklist.");
-      }
-    }
-  }
+  //       timeTravelled = 0;
+  //       distanceTravelled = 0;
+  //     }
+  //     // read sensor input
+  //     obstacle_detection();
+  //     // go back to last square if obstacle is detected along the way
+  //     if(obstacleDetected){
+  //         go_back();
+  //         grid.add_approached_to_blacklist();
+  //         moveDecided = false;
+  //         obstacleDetected = false;
+  //         //Serial.print("An obstacle was added to the blacklist.");
+  //     }
+  //   }
+  // }
 }
