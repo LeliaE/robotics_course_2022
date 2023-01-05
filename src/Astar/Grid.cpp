@@ -9,9 +9,14 @@
 
 #include "Grid.h"
 
-Grid::Grid(int x, int y, int width, int height, Node goal, std::vector<Node> blacklist, DIRECTION_FACING facing) : 
+Grid::Grid(int x, int y, int width, int height, Node goal, DIRECTION_FACING facing) : 
   minX(x), minY(y), maxX(width), maxY(height), blacklist(blacklist), facing(facing) {
-          
+
+
+  // std::vector<Node> blacklist = {Node(0,4), Node(0,7), Node(1,3), Node(2,5), Node(3,0),
+  //                             Node(3,2), Node(4,0), Node(4,2), Node(4,4), Node(5,6),
+  //                             Node(6,2), Node(6,4)};
+                              
   for (int w = minX; w <= maxX; ++w) {
     for (int h = minY; h <= maxY; ++h) {
       Node *node = new Node(w,h);
@@ -22,14 +27,28 @@ Grid::Grid(int x, int y, int width, int height, Node goal, std::vector<Node> bla
         node->status = Node::GOAL;
       }
 
-      // define blacklisted nodes
-      for (const auto& b : blacklist) { 
-        if(node->is_node(b)) {
-          node->status = Node::OBSTACLE;
-        }
-      }
+      // // define blacklisted nodes
+      // for (const auto& b : blacklist) { 
+      //   if(node->is_node(b)) {
+      //     node->status = Node::OBSTACLE;
+      //   }
+      // }
     }
   }
+  this->at(0,4)->status = Node::OBSTACLE;
+  this->at(0,7)->status = Node::OBSTACLE;
+  this->at(1,3)->status = Node::OBSTACLE;
+  this->at(2,5)->status = Node::OBSTACLE;
+  this->at(3,0)->status = Node::OBSTACLE;
+  this->at(3,2)->status = Node::OBSTACLE;
+  this->at(4,0)->status = Node::OBSTACLE;
+  this->at(4,2)->status = Node::OBSTACLE;
+  this->at(4,4)->status = Node::OBSTACLE;
+  this->at(5,6)->status = Node::OBSTACLE;
+  this->at(6,2)->status = Node::OBSTACLE;
+  this->at(6,4)->status = Node::OBSTACLE;
+
+
   currentNode = this->at(minX, minY);
 }
 
