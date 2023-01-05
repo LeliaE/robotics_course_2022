@@ -1,0 +1,6 @@
+Here are the changes we've made since the submission:
+
+- Removed some print lines, having too many bugged our robot.
+- Changed objectDistance to cm, it was the same variable but with different names. Removed the inches calculation.
+- Reduced motor speed to adjust for the downstairs floor type.
+- Changed object detection threshold to 1800 to adjust for weird sensor readings. 
